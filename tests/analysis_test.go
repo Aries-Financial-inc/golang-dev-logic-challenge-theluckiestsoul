@@ -2,11 +2,6 @@ package tests
 
 import (
 	"testing"
-	"net/http"
-	"net/http/httptest"
-	"github.com/stretchr/testify/assert"
-	"github.com/path/to/your/package/models"
-	"github.com/path/to/your/package/controllers"
 )
 
 func TestOptionsContractModelValidation(t *testing.T) {
