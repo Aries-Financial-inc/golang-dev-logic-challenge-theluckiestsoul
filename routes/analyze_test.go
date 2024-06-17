@@ -8,113 +8,13 @@ import (
 	"net/http/httputil"
 	"testing"
 
+	"github.com/Aries-Financial-inc/golang-dev-logic-challenge-theluckiestsoul/models"
 	"github.com/bradleyjkemp/cupaloy"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestOptionsContractValidate(t *testing.T) {
-	tests := []struct {
-		name    string
-		oc      OptionsContract
-		wantErr bool
-	}{
-		{
-			name: "valid contract",
-			oc: OptionsContract{
-				Type:           Call,
-				StrikePrice:    100.0,
-				Bid:            1.0,
-				Ask:            2.0,
-				ExpirationDate: "2022-12-31T23:59:59Z",
-				LongShort:      Long,
-			},
-			wantErr: false,
-		},
-		{
-			name: "invalid option type",
-			oc: OptionsContract{
-				Type:           "InvalidType",
-				StrikePrice:    100.0,
-				Bid:            1.0,
-				Ask:            2.0,
-				ExpirationDate: "2022-12-31T23:59:59Z",
-				LongShort:      Long,
-			},
-			wantErr: true,
-		},
-		{
-			name: "invalid long/short value",
-			oc: OptionsContract{
-				Type:           Call,
-				StrikePrice:    100.0,
-				Bid:            1.0,
-				Ask:            2.0,
-				ExpirationDate: "2022-12-31T23:59:59Z",
-				LongShort:      "InvalidLongShort",
-			},
-			wantErr: true,
-		},
-		{
-			name: "invalid strike price",
-			oc: OptionsContract{
-				Type:           Call,
-				StrikePrice:    -100.0,
-				Bid:            1.0,
-				Ask:            2.0,
-				ExpirationDate: "2022-12-31T23:59:59Z",
-				LongShort:      Long,
-			},
-			wantErr: true,
-		},
-		{
-			name: "bid and ask prices must be positive",
-			oc: OptionsContract{
 
-				Type:           Call,
-				StrikePrice:    100.0,
-				Bid:            -1.0,
-				Ask:            -2.0,
-				ExpirationDate: "2022-12-31T23:59:59Z",
-				LongShort:      Long,
-			},
-			wantErr: true,
-		},
-		{
-			name: "expiration date is required",
-			oc: OptionsContract{
-				Type:           Call,
-				StrikePrice:    100.0,
-				Bid:            1.0,
-				Ask:            2.0,
-				ExpirationDate: "",
-				LongShort:      Long,
-			},
-			wantErr: true,
-		},
-		{
-			name: "invalid expiration date",
-			oc: OptionsContract{
-				Type:           Call,
-				StrikePrice:    100.0,
-				Bid:            1.0,
-				Ask:            2.0,
-				ExpirationDate: "invalid",
-				LongShort:      Long,
-			},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.oc.Validate()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("OptionsContract.Validate() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
 
 func TestAnalyzeEndpoint(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -124,57 +24,57 @@ func TestAnalyzeEndpoint(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		contracts      []OptionsContract
+		contracts      []models.OptionsContract
 		expectedStatus int
 	}{
 		{
 			name: "single call contract",
-			contracts: []OptionsContract{
+			contracts: []models.OptionsContract{
 				{
-					Type:           Call,
+					Type:           models.Call,
 					StrikePrice:    100.0,
 					Bid:            1.0,
 					Ask:            2.0,
 					ExpirationDate: "2022-12-31T23:59:59Z",
-					LongShort:      Long,
+					LongShort:      models.Long,
 				},
 			},
 			expectedStatus: http.StatusOK,
 		},
 		{
 			name: "multiple contracts",
-			contracts: []OptionsContract{
+			contracts: []models.OptionsContract{
 				{
-					Type:           Call,
+					Type:          models.Call,
 					StrikePrice:    100.0,
 					Bid:            10.05,
 					Ask:            12.04,
 					ExpirationDate: "2025-12-17T00:00:00Z",
-					LongShort:      Long,
+					LongShort:      models.Long,
 				},
 				{
-					Type:           Call,
+					Type:           models.Call,
 					StrikePrice:    102.50,
 					Bid:            12.10,
 					Ask:            14.0,
 					ExpirationDate: "2025-12-17T00:00:00Z",
-					LongShort:      Long,
+					LongShort:     models.Long,
 				},
 				{
-					Type:           Put,
+					Type:          models.Put,
 					StrikePrice:    103.0,
 					Bid:            14.0,
 					Ask:            15.50,
 					ExpirationDate: "2025-12-17T00:00:00Z",
-					LongShort:      Short,
+					LongShort:      models.Short,
 				},
 				{
-					Type:           Put,
+					Type:           models.Put,
 					StrikePrice:    105.0,
 					Bid:            16.0,
 					Ask:            18.0,
 					ExpirationDate: "2025-12-17T00:00:00Z",
-					LongShort:      Long,
+					LongShort:      models.Long,
 				},
 			},
 			expectedStatus: http.StatusOK,
